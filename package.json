@@ -1,6 +1,6 @@
 {
   "name": "uri-commands",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Allows you to add URIs to the Obsidian command palette.",
   "main": "main.js",
   "scripts": {

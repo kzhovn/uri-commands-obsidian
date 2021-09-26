@@ -2,6 +2,8 @@
 
 This plugin allows you to add custom URI commands to the command palette. Can bu used with the [Obsidian URI scheme](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI) and [Advanced Obsidian URI](https://github.com/Vinzent03/obsidian-advanced-uri) plugin, as well as any other URI scheme your computer supports.
 
+Accepts {{fileName}} and {{fileText}} placeholders.
+
 ## Examples
 
 ### Obsidian
@@ -13,10 +15,5 @@ This plugin allows you to add custom URI commands to the command palette. Can bu
 ### Other programs
 - Open google: `https://google.com`
     - Note that for websites, you *must* start it with `https://` or `http://` and not `www.`
-- Open an email draft in your mail client: `mailto:friend@example.com`
+- Open an email draft of your current note in your mail client: `mailto:friend@example.com?subject={{fileName}}&body={{fileText}}`
 - Open a spotify album: `spotify:album:4niKC11eq7dRXiDVWsTdEy`
-
-## Todo
-- [x] Add placeholders for file name and text
-- [ ] Only show commands with placeholders when valid
-- [ ] Add placeholder for current selection
