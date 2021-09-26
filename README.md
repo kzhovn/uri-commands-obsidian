@@ -15,3 +15,8 @@ This plugin allows you to add custom URI commands to the command palette. Can bu
     - Note that for websites, you *must* start it with `https://` or `http://` and not `www.`
 - Open an email draft in your mail client: `mailto:friend@example.com`
 - Open a spotify album: `spotify:album:4niKC11eq7dRXiDVWsTdEy`
+
+## Todo
+- [x] Add placeholders for file name and text
+- [ ] Only show commands with placeholders when valid
+- [ ] Add placeholder for current selection

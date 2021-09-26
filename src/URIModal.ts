@@ -15,7 +15,7 @@ export default class URIModal extends Modal {
 		this.newURICommand = {
 			name: "",
 			id: "",
-			URI: "",
+			URITemplate: "",
 		}
 	}
 
@@ -35,7 +35,7 @@ export default class URIModal extends Modal {
 			.setName("URI")
 			.addText((textEl) => {
 			textEl.onChange((value) => {
-				this.newURICommand.URI = value;
+				this.newURICommand.URITemplate = value;
 			});
 		});
 

@@ -5,7 +5,7 @@ import URIModal from './URIModal';
 export interface URICommand {
 	name: string;
 	id: string;
-	URI: string;
+	URITemplate: string;
 }
 
 export interface URIPluginSettings {
@@ -50,7 +50,7 @@ export class URISettingTab extends PluginSettingTab {
 
             const setting = new Setting(containerEl)
                 .setName(command.name)
-				.setDesc(command.URI)
+				.setDesc(command.URITemplate)
                 .addButton(button => {
                     button.setButtonText("Remove URI")
                         .onClick(async () => {
