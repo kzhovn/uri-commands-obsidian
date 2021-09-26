@@ -29,7 +29,7 @@ export class URISettingTab extends PluginSettingTab {
 		let { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: 'PLUGIN_NAME - Settings' });
+		containerEl.createEl('h2', { text: 'URI Commands - Settings' });
 
         new Setting(containerEl)
             .setName("Add URI")
@@ -42,12 +42,12 @@ export class URISettingTab extends PluginSettingTab {
             });
 
         this.plugin.settings.URICommands.forEach(command => {
-			if (command === null) { //for debugging purposes, this should *not* happen 
+			if (command === null) { //for error reduction purposes, this should *not* happen 
 				this.plugin.settings.URICommands.remove(command);
+				console.log("Command was null, removing.")
 				return;
 			}
 
-			console.log(command);
             const setting = new Setting(containerEl)
                 .setName(command.name)
 				.setDesc(command.URI)

@@ -5,7 +5,7 @@ export default class URIPlugin extends Plugin {
 	settings: URIPluginSettings;
 
 	async onload() {
-		console.log('Loading PLUGIN_NAME...');
+		console.log('Loading URI commands...');
 
 		await this.loadSettings();
 		this.addSettingTab(new URISettingTab(this.app, this));
@@ -14,7 +14,7 @@ export default class URIPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log('Unloading PLUGIN_NAME');
+		console.log('Unloading URI commands');
 	}
 
 	async loadSettings() {

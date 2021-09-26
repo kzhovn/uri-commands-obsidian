@@ -24,7 +24,6 @@ export default class URIModal extends Modal {
 
 		new Setting(contentEl)
 			.setName("Command name")
-			.setDesc("")
 			.addText((textEl) => {
 			textEl.onChange((value) => {
 				this.newURICommand.name = value;
@@ -34,7 +33,6 @@ export default class URIModal extends Modal {
 
 		new Setting(contentEl)
 			.setName("URI")
-			.setDesc("")
 			.addText((textEl) => {
 			textEl.onChange((value) => {
 				this.newURICommand.URI = value;
