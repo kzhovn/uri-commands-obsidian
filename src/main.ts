@@ -1,35 +1,16 @@
-import { App, Modal, Notice, Plugin } from 'obsidian';
-import { SampleSettingTab, MyPluginSettings, DEFAULT_SETTINGS } from './settings';
+import { Plugin } from 'obsidian';
+import { URISettingTab, URIPluginSettings, DEFAULT_SETTINGS, URICommand } from './settings';
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class URIPlugin extends Plugin {
+	settings: URIPluginSettings;
 
 	async onload() {
 		console.log('Loading PLUGIN_NAME...');
 
 		await this.loadSettings();
+		this.addSettingTab(new URISettingTab(this.app, this));
 
-		this.addRibbonIcon('icon', 'PLUGIN_NAME', () => {
-			//do something on click
-		});
-
-		this.addCommand({
-			id: 'open-sample-modal',
-			name: 'Open Sample Modal',
-
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						//do something
-					}
-					return true;
-				}
-				return false;
-			}
-		});
-
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addCommands();
 	}
 
 	onunload() {
@@ -43,6 +24,26 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	async addCommands() {
+		this.settings.URICommands.forEach(async command => {
+			await this.addURICommand(command);
+		})
+	}
+
+	async addURICommand(command: URICommand) {
+		this.addCommand({
+			id: command.id,
+			name: command.name,
+	
+			callback: () => { //remove check, I think that's okay because URIs should be valid everywhere? honestly not 100% sure what thats doing in the default plugin
+				window.open(command.URI);
+			}
+		})
+	}
+	
 }
+
+
 
 
