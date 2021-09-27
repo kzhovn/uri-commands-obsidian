@@ -13,14 +13,14 @@ const EMPTY_URI_COMMAND: URICommand = {
 export default class URIModal extends Modal {
 	settingTab: URISettingTab;
 	plugin: URIPlugin;
-	newURICommand: URICommand;
+	URICommand: URICommand;
 	editMode: boolean = false;
 
 	constructor(plugin: URIPlugin, settingTab: URISettingTab, command = EMPTY_URI_COMMAND) {
 		super(plugin.app);
 		this.settingTab = settingTab;
 		this.plugin = plugin;
-		this.newURICommand = command;
+		this.URICommand = command;
 
 		if (command !== EMPTY_URI_COMMAND) {
 			this.editMode = true;
@@ -33,10 +33,10 @@ export default class URIModal extends Modal {
 		new Setting(contentEl)
 			.setName("Command name")
 			.addText((textEl) => {
-				textEl.setValue(this.newURICommand.name)
+				textEl.setValue(this.URICommand.name)
 					.onChange((value) => {
-						this.newURICommand.name = value;
-						this.newURICommand.id = value.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
+						this.URICommand.name = value;
+						this.URICommand.id = value.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
 			});
 		});
 
@@ -44,9 +44,9 @@ export default class URIModal extends Modal {
 			.setName("URI")
 			.setDesc("Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.")
 			.addText((textEl) => {
-				textEl.setValue(this.newURICommand.URITemplate)
+				textEl.setValue(this.URICommand.URITemplate)
 				.onChange((value) => {
-					this.newURICommand.URITemplate = value;
+					this.URICommand.URITemplate = value;
 			});
 		});
 
@@ -57,36 +57,33 @@ export default class URIModal extends Modal {
 			.addButton(button => {
 
 				//button appearance
-				if (this.newURICommand.icon) {
-					button.setIcon(this.newURICommand.icon);
+				if (this.URICommand.icon) {
+					button.setIcon(this.URICommand.icon);
 				} else {
 					button.setButtonText("Pick icon");
 				}
 
 				button.onClick(() => {
-					new IconPicker(this.plugin, this.newURICommand).open()
+					new IconPicker(this.plugin, this.URICommand).open()
 				})
-
 			})
 
 		//https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L132
 		//what exactly does this do?
-		const btnDiv = contentEl.createDiv({ cls: "M-flex-center" });
+		const buttonDiv = contentEl.createDiv({ cls: "M-flex-center" });
 		const button = createEl("button", {text: "Save command"});
-		btnDiv.appendChild(button);
+		buttonDiv.appendChild(button);
 
 		button.onClickEvent( async () => {
-
 			if (this.editMode === false) {
-				this.plugin.settings.URICommands.push(this.newURICommand);
-				await this.plugin.addURICommand(this.newURICommand);
+				this.plugin.settings.URICommands.push(this.URICommand);
+				await this.plugin.addURICommand(this.URICommand);
 			}
 
 			await this.plugin.saveSettings();	
 			this.settingTab.display(); //refresh settings tab
 			this.close();
 		})
-		
 	}
 
 	async onClose() {
