@@ -22,4 +22,4 @@ Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.
 - Open the wikipedia page for your current slection: `https://en.wikipedia.org/wiki/{{selection}}`
 
 ## Thanks
-Parts of my code, especially the icon picker, borrow heavily from phibr0's plugins, including [Obsidian Macros](https://github.com/phibr0/obsidian-macros) and Customizable Menu.
+Parts of this code, especially the icon picker, borrow heavily from [phibr0](https://github.com/phibr0)'s plugins, including [Obsidian Macros](https://github.com/phibr0/obsidian-macros) and [Customizable Sidebar](https://github.com/phibr0/obsidian-customizable-sidebar).
