@@ -33,7 +33,7 @@ export default class URIModal extends Modal {
 
 		new Setting(contentEl)
 			.setName("URI")
-			.setDesc("Accepts {{fileName}} and {{fileText}} placeholders.")
+			.setDesc("Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.")
 			.addText((textEl) => {
 			textEl.onChange((value) => {
 				this.newURICommand.URITemplate = value;

@@ -2,7 +2,7 @@
 
 This plugin allows you to add custom URI commands to the command palette. Can bu used with the [Obsidian URI scheme](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI) and [Advanced Obsidian URI](https://github.com/Vinzent03/obsidian-advanced-uri) plugin, as well as any other URI scheme your computer supports.
 
-Accepts {{fileName}} and {{fileText}} placeholders.
+Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.
 
 ## Examples
 
