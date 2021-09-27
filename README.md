@@ -1,6 +1,6 @@
 ## Overview
 
-This plugin allows you to add custom URI commands to the command palette. Can bu used with the [Obsidian URI scheme](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI), as well as any other URI scheme your computer supports.
+This plugin allows you to add custom URI commands to the command palette. Can be used with the [Obsidian URI scheme](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI), as well as any other URI scheme your computer supports.
 
 Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.
 

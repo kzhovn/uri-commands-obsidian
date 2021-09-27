@@ -3,7 +3,7 @@
 	"name": "URI Commands",
 	"version": "0.2.0",
 	"minAppVersion": "0.9.12",
-	"description": "Allows you to add URIs to the Obsidian command palette.",
+	"description": "Execute URIs from the Obsidian command palette.",
 	"author": "kzhovn",
 	"authorUrl": "https://github.com/kzhovn",
 	"isDesktopOnly": false

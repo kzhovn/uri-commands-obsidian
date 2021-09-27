@@ -43,7 +43,7 @@ export class URISettingTab extends PluginSettingTab {
             });
 
         this.plugin.settings.URICommands.forEach(command => {
-			if (command === null) { //for error reduction purposes, this should *not* happen 
+			if (command === null) { //this should *not* happen 
 				this.plugin.settings.URICommands.remove(command);
 				console.log("Command was null, removing.")
 				return;
@@ -54,7 +54,7 @@ export class URISettingTab extends PluginSettingTab {
 				.setDesc(command.URITemplate)
                 .addExtraButton(button => {
                     button.setIcon("trash")
-                          .setTooltip("Delete command")
+                          .setTooltip("Remove command")
                           .onClick(async () => {
                             this.plugin.settings.URICommands.remove(command);
                             await this.plugin.saveSettings();
