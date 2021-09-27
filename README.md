@@ -7,7 +7,6 @@ Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.
 ## Examples
 
 ### Obsidian
-(from [Obsidian docs](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI#Available+actions) and [Advanced Obsidian URI docs](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI#Available+actions))
 - Open the vault `work vaut`: `obsidian://open?vault=work%20vault`
 - Open the note `hotkey reference` in the vault `my vault`: `obsidian://open?vault=my%20vault&file=hotkey%20reference`
 - Append your selection to today's daily note (requires Advanced URI plugin): `obsidian://advanced-uri?vault=&daily=true&data={{selection}}&mode=append`
