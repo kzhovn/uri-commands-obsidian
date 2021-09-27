@@ -42,7 +42,6 @@ export class IconPicker extends FuzzySuggestModal<string>{
     async onChooseItem(item: string): Promise<void> {
         this.command.icon = item;
         this.close();
-        
     }
 
 }

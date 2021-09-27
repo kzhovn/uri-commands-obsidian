@@ -3,21 +3,27 @@ import { IconPicker } from "./iconPicker";
 import URIPlugin from "./main";
 import { URISettingTab, URICommand } from "./settings";
 
+const EMPTY_URI_COMMAND: URICommand = {
+	name: "",
+	id: "",
+	URITemplate: "",
+	icon: "",
+}
+
 export default class URIModal extends Modal {
 	settingTab: URISettingTab;
 	plugin: URIPlugin;
 	newURICommand: URICommand;
+	editMode: boolean = false;
 
-	constructor(plugin: URIPlugin, settingTab: URISettingTab) {
+	constructor(plugin: URIPlugin, settingTab: URISettingTab, command = EMPTY_URI_COMMAND) {
 		super(plugin.app);
 		this.settingTab = settingTab;
 		this.plugin = plugin;
+		this.newURICommand = command;
 
-		this.newURICommand = {
-			name: "",
-			id: "",
-			URITemplate: "",
-			icon: "",
+		if (command !== EMPTY_URI_COMMAND) {
+			this.editMode = true;
 		}
 	}
 
@@ -27,9 +33,10 @@ export default class URIModal extends Modal {
 		new Setting(contentEl)
 			.setName("Command name")
 			.addText((textEl) => {
-			textEl.onChange((value) => {
-				this.newURICommand.name = value;
-				this.newURICommand.id = value.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
+				textEl.setValue(this.newURICommand.name)
+					.onChange((value) => {
+						this.newURICommand.name = value;
+						this.newURICommand.id = value.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
 			});
 		});
 
@@ -37,8 +44,9 @@ export default class URIModal extends Modal {
 			.setName("URI")
 			.setDesc("Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.")
 			.addText((textEl) => {
-			textEl.onChange((value) => {
-				this.newURICommand.URITemplate = value;
+				textEl.setValue(this.newURICommand.URITemplate)
+				.onChange((value) => {
+					this.newURICommand.URITemplate = value;
 			});
 		});
 
@@ -68,12 +76,14 @@ export default class URIModal extends Modal {
 		btnDiv.appendChild(button);
 
 		button.onClickEvent( async () => {
-			this.plugin.settings.URICommands.push(this.newURICommand);
-			await this.plugin.saveSettings();
+
+			if (this.editMode === false) {
+				this.plugin.settings.URICommands.push(this.newURICommand);
+				await this.plugin.addURICommand(this.newURICommand);
+			}
+
+			await this.plugin.saveSettings();	
 			this.settingTab.display(); //refresh settings tab
-
-			await this.plugin.addURICommand(this.newURICommand);
-
 			this.close();
 		})
 		

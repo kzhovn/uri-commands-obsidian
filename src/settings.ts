@@ -66,7 +66,7 @@ export class URISettingTab extends PluginSettingTab {
                     button.setIcon("gear")
                           .setTooltip("Edit command")
                           .onClick(() => {
-
+                            new URIModal(this.plugin, this, command).open()
                     })
                 });
             setting.nameEl.addClass("CS-flex");
