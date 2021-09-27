@@ -16,4 +16,10 @@ Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.
 - Open google: `https://google.com`
     - Note that for websites, you *must* start it with `https://` or `http://` and not `www.`
 - Open an email draft of your current note in your mail client: `mailto:friend@example.com?subject={{fileName}}&body={{fileText}}`
+- [Email](http://www.sendtoroam.com/) your current note to Roam: `mailto:me@sendtoraom.com?subject={{fileName}}&body={{fileText}}`
 - Open a spotify album: `spotify:album:4niKC11eq7dRXiDVWsTdEy`
+- Open a new [HackMD](https://hackmd.io/) collaborative markdown pad: `https://hackmd.io/new`
+- Open the wikipedia page for your current slection: `https://en.wikipedia.org/wiki/{{selection}}`
+
+## Thanks
+Parts of my code, especially the icon picker, borrow heavily from phibr0's plugins, including Obsidian Macros and Customizable Menu.

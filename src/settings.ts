@@ -6,6 +6,7 @@ export interface URICommand {
 	name: string;
 	id: string;
 	URITemplate: string;
+    icon?: string;
 }
 
 export interface URIPluginSettings {

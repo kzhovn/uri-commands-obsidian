@@ -1,4 +1,5 @@
 import { Modal, Setting } from "obsidian";
+import { IconPicker } from "./iconPicker";
 import URIPlugin from "./main";
 import { URISettingTab, URICommand } from "./settings";
 
@@ -16,6 +17,7 @@ export default class URIModal extends Modal {
 			name: "",
 			id: "",
 			URITemplate: "",
+			icon: "",
 		}
 	}
 
@@ -39,6 +41,25 @@ export default class URIModal extends Modal {
 				this.newURICommand.URITemplate = value;
 			});
 		});
+
+		//heavily borrowing https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L66
+		new Setting(contentEl)
+			.setName("Add icon")
+			.setDesc("Optional")
+			.addButton(button => {
+
+				//button appearance
+				if (this.newURICommand.icon) {
+					button.setIcon(this.newURICommand.icon);
+				} else {
+					button.setButtonText("Pick icon");
+				}
+
+				button.onClick(() => {
+					new IconPicker(this.plugin, this.newURICommand).open()
+				})
+
+			})
 
 		//https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L132
 		//what exactly does this do?
