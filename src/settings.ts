@@ -37,7 +37,7 @@ export class URISettingTab extends PluginSettingTab {
             .setDesc("Add a new URI to the command palette")
             .addButton((button) => {
                 button.setButtonText("Add Command")
-                    .onClick(() => {
+                      .onClick(() => {
                         new URIModal(this.plugin, this).open();
                     });
             });
@@ -52,14 +52,22 @@ export class URISettingTab extends PluginSettingTab {
             const setting = new Setting(containerEl)
                 .setName(command.name)
 				.setDesc(command.URITemplate)
-                .addButton(button => {
-                    button.setButtonText("Remove URI")
-                        .onClick(async () => {
+                .addExtraButton(button => {
+                    button.setIcon("trash")
+                          .setTooltip("Delete command")
+                          .onClick(async () => {
                             this.plugin.settings.URICommands.remove(command);
                             await this.plugin.saveSettings();
                             this.display();
                             new Notice("You will need to restart Obsidian for the command to disappear.")
                         })
+                })
+                .addExtraButton(button => {
+                    button.setIcon("gear")
+                          .setTooltip("Edit command")
+                          .onClick(() => {
+
+                    })
                 });
             setting.nameEl.addClass("CS-flex");
         });
