@@ -1,7 +1,7 @@
 {
 	"id": "uri-commands",
 	"name": "URI Commands",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"minAppVersion": "0.9.12",
 	"description": "Allows you to add URIs to the Obsidian command palette.",
 	"author": "kzhovn",
