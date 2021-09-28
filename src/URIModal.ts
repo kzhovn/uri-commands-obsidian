@@ -3,12 +3,6 @@ import { IconPicker } from "./iconPicker";
 import URIPlugin from "./main";
 import { URISettingTab, URICommand } from "./settings";
 
-const EMPTY_URI_COMMAND: URICommand = {
-	name: "",
-	id: "",
-	URITemplate: "",
-	icon: "",
-}
 
 export default class URIModal extends Modal {
 	settingTab: URISettingTab;
@@ -16,12 +10,22 @@ export default class URIModal extends Modal {
 	URICommand: URICommand;
 	editMode: boolean;
 
-	constructor(plugin: URIPlugin, settingTab: URISettingTab, command = EMPTY_URI_COMMAND, editMode = false) {
+	constructor(plugin: URIPlugin, settingTab: URISettingTab, command: URICommand = null, editMode = false) {
 		super(plugin.app);
 		this.settingTab = settingTab;
 		this.plugin = plugin;
-		this.URICommand = command;
 		this.editMode = editMode;
+
+		if (command === null) {
+			this.URICommand = {
+				name: "",
+				id: "",
+				URITemplate: "",
+				icon: "",
+			}
+		} else {
+			this.URICommand = command; 
+		}
 	}
 
 	onOpen() {
@@ -31,6 +35,7 @@ export default class URIModal extends Modal {
 	display() {
 		let {contentEl} = this;
 		contentEl.empty();
+		console.log(this.URICommand);
 
 		new Setting(contentEl)
 			.setName("Command name")
@@ -73,10 +78,10 @@ export default class URIModal extends Modal {
 		//https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L132
 		//what exactly does this do?
 		const buttonDiv = contentEl.createDiv({ cls: "URI-flex-center" });
-		const button = createEl("button", {text: "Save command"});
-		buttonDiv.appendChild(button);
+		const saveButton = createEl("button", {text: "Save command"});
+		buttonDiv.appendChild(saveButton);
 
-		button.onClickEvent( async () => {
+		saveButton.onClickEvent( async () => {
 			if (this.editMode === false) { //creating a new command
 				this.plugin.settings.URICommands.push(this.URICommand);
 				this.plugin.addURICommand(this.URICommand);
@@ -93,5 +98,6 @@ export default class URIModal extends Modal {
 	onClose() {
 	 	let {contentEl} = this;
 		contentEl.empty();
+		console.log(this.URICommand);
 	}
 }
