@@ -19,7 +19,8 @@ Note that {{fileName}} is *just* the basename of the file, without the filepath 
 - Open a spotify album: `spotify:album:4niKC11eq7dRXiDVWsTdEy`
 - Open a new [HackMD](https://hackmd.io/) collaborative markdown pad: `https://hackmd.io/new`
     - Note that for websites, you *must* start your URI with `https://` or `http://`, not `www.`
-- Open the wikipedia page for your current selection: `https://en.wikipedia.org/wiki/{{selection}}`
+- Open the wikipedia page for your selection: `https://en.wikipedia.org/wiki/{{selection}}`
+- Look up your selection in your Calibre library: `calibre://search/_?q={{selection}}`
 
 ## Related plugins
 - [Advanced URI](https://github.com/Vinzent03/obsidian-advanced-uri): enables URIs for daily note, appending text to a file, jump to heading, search and replace, and more

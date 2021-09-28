@@ -35,7 +35,7 @@ export default class URIPlugin extends Plugin {
 	}
 
 	addCommands() {
-		this.settings.URICommands.forEach(async command => {
+		this.settings.URICommands.forEach(command => {
 			this.addURICommand(command);
 		})
 	}

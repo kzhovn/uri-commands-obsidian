@@ -17,3 +17,8 @@
 .URI-flex {
     display: flex;
 }
+
+.URI-flex-center {
+    display: flex;
+    place-content: center;
+}

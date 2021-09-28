@@ -35,15 +35,14 @@ export default class URIModal extends Modal {
 	display() {
 		let {contentEl} = this;
 		contentEl.empty();
-		console.log(this.URICommand);
 
 		new Setting(contentEl)
 			.setName("Command name")
+			.setDesc("Must be unique")
 			.addText((textEl) => {
 				textEl.setValue(this.URICommand.name)
 					.onChange((value) => {
 						this.URICommand.name = value;
-						this.URICommand.id = value.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
 			});
 		});
 
@@ -82,22 +81,33 @@ export default class URIModal extends Modal {
 		buttonDiv.appendChild(saveButton);
 
 		saveButton.onClickEvent( async () => {
-			if (this.editMode === false) { //creating a new command
-				this.plugin.settings.URICommands.push(this.URICommand);
-				this.plugin.addURICommand(this.URICommand);
-			} else { //editing an existing command
-				new Notice("You will need to restart Obsidian for the change to take effect.")
-			}
+			let duplicateCommand = false;
+			this.URICommand.id = this.URICommand.name.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
 
-			await this.plugin.saveSettings();	
-			this.settingTab.display(); //refresh settings tab
-			this.close();
+			this.plugin.settings.URICommands.forEach(command => {
+				if (command.id === this.URICommand.id) {
+					duplicateCommand = true; //want to just return but that closes the modal
+					new Notice("A URI command with this name already exists. Please choose a new name.");
+				}
+			})
+
+			if (duplicateCommand === false) {
+				if (this.editMode === false) { //creating a new command
+					this.plugin.settings.URICommands.push(this.URICommand);
+					this.plugin.addURICommand(this.URICommand);
+				} else { //editing an existing command
+					new Notice("You will need to restart Obsidian for the change to take effect.")
+				}
+	
+				await this.plugin.saveSettings();	
+				this.settingTab.display(); //refresh settings tab
+				this.close();
+			}
 		})
 	}
 
 	onClose() {
 	 	let {contentEl} = this;
 		contentEl.empty();
-		console.log(this.URICommand);
 	}
 }
