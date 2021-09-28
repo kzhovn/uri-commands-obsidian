@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
+import { App, PluginSettingTab, Setting, Notice, setIcon } from 'obsidian';
 import URIPlugin from './main';
 import URIModal from './URIModal';
 
@@ -49,6 +49,13 @@ export class URISettingTab extends PluginSettingTab {
 				return;
 			}
 
+            let iconDiv: HTMLElement;
+            if (command.icon) {     //*do* want the "if exists or empty string or undefined" behavior
+                iconDiv = createDiv({ cls: "URI-settings-icon" });
+                setIcon(iconDiv, command.icon, 20);    
+            }
+
+
             const setting = new Setting(containerEl)
                 .setName(command.name)
 				.setDesc(command.URITemplate)
@@ -69,6 +76,10 @@ export class URISettingTab extends PluginSettingTab {
                             new URIModal(this.plugin, this, command, true).open()
                     })
                 });
+            
+            if (command.icon) {
+                setting.nameEl.prepend(iconDiv);
+            }
             setting.nameEl.addClass("URI-flex");
         });
 
