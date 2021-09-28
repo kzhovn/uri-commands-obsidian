@@ -3,15 +3,18 @@
 import { FuzzyMatch, FuzzySuggestModal, setIcon } from "obsidian";
 import URIPlugin from "src/main";
 import { URICommand } from "./settings";
+import URIModal from "./URIModal";
 
 export class IconPicker extends FuzzySuggestModal<string>{
     plugin: URIPlugin;
     command: URICommand;
+    modal: URIModal;
 
-    constructor(plugin: URIPlugin, command: URICommand) {
+    constructor(plugin: URIPlugin, command: URICommand, modal: URIModal) {
         super(plugin.app);
         this.plugin = plugin;
         this.command = command;
+        this.modal = modal;
         this.setPlaceholder("Pick an icon");
     }
 
@@ -41,6 +44,7 @@ export class IconPicker extends FuzzySuggestModal<string>{
 
     onChooseItem(item: string): void {
         this.command.icon = item;
+        this.modal.display();
         this.close();
     }
 

@@ -25,7 +25,12 @@ export default class URIModal extends Modal {
 	}
 
 	onOpen() {
+		this.display();
+	}
+
+	display() {
 		let {contentEl} = this;
+		contentEl.empty();
 
 		new Setting(contentEl)
 			.setName("Command name")
@@ -61,7 +66,7 @@ export default class URIModal extends Modal {
 				}
 
 				button.onClick(() => {
-					new IconPicker(this.plugin, this.URICommand).open()
+					new IconPicker(this.plugin, this.URICommand, this).open()
 				})
 			})
 
@@ -72,10 +77,10 @@ export default class URIModal extends Modal {
 		buttonDiv.appendChild(button);
 
 		button.onClickEvent( async () => {
-			if (this.editMode === false) {
+			if (this.editMode === false) { //creating a new command
 				this.plugin.settings.URICommands.push(this.URICommand);
 				this.plugin.addURICommand(this.URICommand);
-			} else {
+			} else { //editing an existing command
 				new Notice("You will need to restart Obsidian for the change to take effect.")
 			}
 
