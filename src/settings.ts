@@ -69,7 +69,7 @@ export class URISettingTab extends PluginSettingTab {
                             new URIModal(this.plugin, this, command).open()
                     })
                 });
-            setting.nameEl.addClass("CS-flex");
+            setting.nameEl.addClass("URI-flex");
         });
 
 	}

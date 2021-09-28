@@ -70,14 +70,14 @@ export default class URIModal extends Modal {
 
 		//https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L132
 		//what exactly does this do?
-		const buttonDiv = contentEl.createDiv({ cls: "M-flex-center" });
+		const buttonDiv = contentEl.createDiv({ cls: "URI-flex-center" });
 		const button = createEl("button", {text: "Save command"});
 		buttonDiv.appendChild(button);
 
 		button.onClickEvent( async () => {
 			if (this.editMode === false) {
 				this.plugin.settings.URICommands.push(this.URICommand);
-				await this.plugin.addURICommand(this.URICommand);
+				this.plugin.addURICommand(this.URICommand);
 			}
 
 			await this.plugin.saveSettings();	
@@ -86,7 +86,7 @@ export default class URIModal extends Modal {
 		})
 	}
 
-	async onClose() {
+	onClose() {
 	 	let {contentEl} = this;
 		contentEl.empty();
 	}

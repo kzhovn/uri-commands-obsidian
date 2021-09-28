@@ -18,8 +18,8 @@ export default class URIPlugin extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new URISettingTab(this.app, this));
 
-		await this.addCommands();
-		await this.addFeatherIcons();
+		this.addCommands();
+		this.addFeatherIcons();
 	}
 
 	onunload() {
@@ -34,13 +34,13 @@ export default class URIPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async addCommands() {
+	addCommands() {
 		this.settings.URICommands.forEach(async command => {
-			await this.addURICommand(command);
+			this.addURICommand(command);
 		})
 	}
 
-	async addURICommand(command: URICommand) {
+	addURICommand(command: URICommand) {
 		let URIString = command.URITemplate;
 
 		//if needs editor
@@ -50,13 +50,11 @@ export default class URIPlugin extends Plugin {
 				name: command.name,
 				icon: command.icon,
 		
-				editorCallback: async (editor: Editor) => { //remove check, I think that's okay because URIs should be valid everywhere? honestly not 100% sure what thats doing in the default plugin
+				editorCallback: async (editor: Editor) => {
 					URIString = command.URITemplate; //needs to be set *inside* the command
 					const activeFile = this.app.workspace.getActiveFile();
-					console.log("Running command.")
 
-					if (activeFile) { //is this redundant with editorCallback
-						console.log(URIString);
+					if (activeFile) { //is this redundant with editorCallback?
 						if (URIString.includes(FILE_NAME_TEMPLATE)) {
 							const encodedName = encodeURIComponent(activeFile.basename);
 							URIString = URIString.replace(FILE_NAME_TEMPLATE, encodedName);
@@ -82,7 +80,7 @@ export default class URIPlugin extends Plugin {
 				name: command.name,
 				icon: command.icon,
 		
-				callback: async () => { //remove check, I think that's okay because URIs should be valid everywhere? honestly not 100% sure what thats doing in the default plugin
+				callback: () => { //remove check, I think that's okay because URIs should be valid everywhere? honestly not 100% sure what thats doing in the default plugin
 					window.open(URIString);
 				}
 			})
@@ -90,7 +88,7 @@ export default class URIPlugin extends Plugin {
 	}
 
 	//from phibr0
-	async addFeatherIcons() {
+	private addFeatherIcons() {
 		Object.values(feather.icons).forEach((icon) => {
 			const svg = icon.toSvg({viewBox: "0 0 24 24", width: "100", height: "100"});
 			addIcon("feather-" + icon.name, svg);
