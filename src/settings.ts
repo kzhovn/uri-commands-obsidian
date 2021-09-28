@@ -50,7 +50,7 @@ export class URISettingTab extends PluginSettingTab {
 			}
 
             let iconDiv: HTMLElement;
-            if (command.icon) {     //*do* want the "if exists or empty string or undefined" behavior
+            if (command.icon) {     //do want the "if null or empty string or undefined or etc" behavior
                 iconDiv = createDiv({ cls: "URI-settings-icon" });
                 setIcon(iconDiv, command.icon, 20);    
             }

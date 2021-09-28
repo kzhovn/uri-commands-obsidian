@@ -18,7 +18,7 @@ Note that {{fileName}} is *just* the basename of the file, without the filepath 
 - [Email your current note to Roam](http://www.sendtoroam.com/): `mailto:me@sendtoraom.com?subject={{fileName}}&body={{fileText}}`
 - Open a spotify album: `spotify:album:4niKC11eq7dRXiDVWsTdEy`
 - Open a new [HackMD](https://hackmd.io/) collaborative markdown pad: `https://hackmd.io/new`
-- Note that for websites, you *must* start your URI with `https://` or `http://`, not `www.`
+    - Note that for websites, you *must* start your URI with `https://` or `http://`, not `www.`
 - Open the wikipedia page for your current selection: `https://en.wikipedia.org/wiki/{{selection}}`
 
 ## Related plugins
