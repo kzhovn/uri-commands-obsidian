@@ -1,4 +1,4 @@
-import { Modal, Setting } from "obsidian";
+import { Modal, Notice, Setting } from "obsidian";
 import { IconPicker } from "./iconPicker";
 import URIPlugin from "./main";
 import { URISettingTab, URICommand } from "./settings";
@@ -14,17 +14,14 @@ export default class URIModal extends Modal {
 	settingTab: URISettingTab;
 	plugin: URIPlugin;
 	URICommand: URICommand;
-	editMode: boolean = false;
+	editMode: boolean;
 
-	constructor(plugin: URIPlugin, settingTab: URISettingTab, command = EMPTY_URI_COMMAND) {
+	constructor(plugin: URIPlugin, settingTab: URISettingTab, command = EMPTY_URI_COMMAND, editMode = false) {
 		super(plugin.app);
 		this.settingTab = settingTab;
 		this.plugin = plugin;
 		this.URICommand = command;
-
-		if (command !== EMPTY_URI_COMMAND) {
-			this.editMode = true;
-		}
+		this.editMode = editMode;
 	}
 
 	onOpen() {
@@ -78,6 +75,8 @@ export default class URIModal extends Modal {
 			if (this.editMode === false) {
 				this.plugin.settings.URICommands.push(this.URICommand);
 				this.plugin.addURICommand(this.URICommand);
+			} else {
+				new Notice("You will need to restart Obsidian for the change to take effect.")
 			}
 
 			await this.plugin.saveSettings();	
