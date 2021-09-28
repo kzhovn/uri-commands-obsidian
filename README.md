@@ -1,13 +1,14 @@
 ## Overview
-
 This plugin allows you to add custom URI commands to the command palette. Can be used with the [Obsidian URI scheme](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI), as well as any other URI scheme your computer supports.
 
-Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.
+### Placeholders
+You can use {{fileName}}, {{fileText}}, and {{selection}} placeholders in your URI. All of these are [URL-encoded](https://en.wikipedia.org/wiki/Percent-encoding) for you, so you don't need to worry about your text having any unescaped illegal or reserved characters.
+
+Note that {{fileName}} is *just* the basename of the file, without the filepath or the file extension.
 
 ## Examples
-
 ### Obsidian
-- Open the vault `work vaut`: `obsidian://open?vault=work%20vault`
+- Open the vault `work vault`: `obsidian://open?vault=work%20vault`
 - Open the note `hotkey reference` in the vault `my vault`: `obsidian://open?vault=my%20vault&file=hotkey%20reference`
 - Append your selection to today's daily note (requires Advanced URI plugin): `obsidian://advanced-uri?vault=&daily=true&data={{selection}}&mode=append`
 - Open this plugin's settings page (requires Hotkey Helper plugin): `obsidian://goto-plugin?id=uri-commands&show=config`
@@ -17,8 +18,8 @@ Accepts {{fileName}}, {{fileText}}, and {{selection}} placeholders.
 - [Email your current note to Roam](http://www.sendtoroam.com/): `mailto:me@sendtoraom.com?subject={{fileName}}&body={{fileText}}`
 - Open a spotify album: `spotify:album:4niKC11eq7dRXiDVWsTdEy`
 - Open a new [HackMD](https://hackmd.io/) collaborative markdown pad: `https://hackmd.io/new`
-    - Note that for websites, you *must* start your URI with `https://` or `http://`, not `www.`
-- Open the wikipedia page for your current slection: `https://en.wikipedia.org/wiki/{{selection}}`
+- Note that for websites, you *must* start your URI with `https://` or `http://`, not `www.`
+- Open the wikipedia page for your current selection: `https://en.wikipedia.org/wiki/{{selection}}`
 
 ## Related plugins
 - [Advanced URI](https://github.com/Vinzent03/obsidian-advanced-uri): enables URIs for daily note, appending text to a file, jump to heading, search and replace, and more
