@@ -1,7 +1,7 @@
 {
   "name": "uri-commands",
-  "version": "0.2.1",
-  "description": "Allows you to add URIs to the Obsidian command palette.",
+  "version": "0.3.0",
+  "description": "Execute URIs from the Obsidian command palette.",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
