@@ -1,12 +1,9 @@
-import { App, PluginSettingTab, Setting, Notice, setIcon } from 'obsidian';
+import { App, PluginSettingTab, Setting, Notice, setIcon, Command } from 'obsidian';
 import URIPlugin from './main';
 import URIModal from './URIModal';
 
-export interface URICommand {
-	name: string;
-	id: string;
+export interface URICommand extends Command {
 	URITemplate: string;
-    icon?: string;
 }
 
 export interface URIPluginSettings {

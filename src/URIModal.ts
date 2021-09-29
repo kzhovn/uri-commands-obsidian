@@ -21,7 +21,6 @@ export default class URIModal extends Modal {
 				name: "",
 				id: "",
 				URITemplate: "",
-				icon: "",
 			}
 		} else {
 			this.URICommand = command; 
@@ -61,7 +60,6 @@ export default class URIModal extends Modal {
 			.setName("Add icon")
 			.setDesc("Optional")
 			.addButton(button => {
-
 				//button appearance
 				if (this.URICommand.icon) {
 					button.setIcon(this.URICommand.icon);
@@ -74,24 +72,39 @@ export default class URIModal extends Modal {
 				})
 			})
 
+		// new Setting(contentEl)
+		// 	.setName("Add hotkey")
+		// 	.setDesc("Optional")
+		// 	.addButton(button => {
+		// 		if (this.URICommand.hotkeys) {
+
+		// 		} else {
+
+		// 		}
+		// 	})
+
+
 		//https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L132
-		//what exactly does this do?
 		const buttonDiv = contentEl.createDiv({ cls: "URI-flex-center" });
 		const saveButton = createEl("button", {text: "Save command"});
 		buttonDiv.appendChild(saveButton);
 
 		saveButton.onClickEvent( async () => {
 			let duplicateCommand = false;
-			this.URICommand.id = this.URICommand.name.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
+			let id = this.URICommand.name.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
 
 			this.plugin.settings.URICommands.forEach(command => {
-				if (command.id === this.URICommand.id) {
+				if (command.id === id) {
+					console.log(command);
 					duplicateCommand = true; //want to just return but that closes the modal
 					new Notice("A URI command with this name already exists. Please choose a new name.");
 				}
 			})
 
-			if (duplicateCommand === false) {
+			//if valid command name/id, save and exit
+			if (duplicateCommand === false) { 
+				this.URICommand.id = id; //in edit mode, if set directly would update the command immediately so we couldn't check for name duplicates preroply
+
 				if (this.editMode === false) { //creating a new command
 					this.plugin.settings.URICommands.push(this.URICommand);
 					this.plugin.addURICommand(this.URICommand);
