@@ -1,4 +1,4 @@
-import { Modal, Notice, Setting } from "obsidian";
+import { Modal, Notice, Setting, moment } from "obsidian";
 import { IconPicker } from "./iconPicker";
 import URIPlugin from "./main";
 import { URISettingTab, URICommand } from "./settings";
@@ -37,7 +37,6 @@ export default class URIModal extends Modal {
 
 		new Setting(contentEl)
 			.setName("Command name")
-			.setDesc("Must be unique")
 			.addText((textEl) => {
 				textEl.setValue(this.URICommand.name)
 					.onChange((value) => {
@@ -72,16 +71,30 @@ export default class URIModal extends Modal {
 				})
 			})
 
+		//borrowing from https://github.com/pjeby/hotkey-helper/blob/e394b940dfc0a98fdb4db6e586558956e03f2673/src/plugin.js#L410
 		// new Setting(contentEl)
-		// 	.setName("Add hotkey")
+		// 	.setName("Configure hotkey")
 		// 	.setDesc("Optional")
 		// 	.addButton(button => {
+		// 		button.setTooltip("Set hotkey")
+
 		// 		if (this.URICommand.hotkeys) {
-
+		// 			button.setButtonText(this.URICommand.hotkeys.toString())
 		// 		} else {
-
+		// 			button.setIcon("any-key")
 		// 		}
+
+		// 		button.onClick(() => {
+		// 			this.close();
+		// 			this.plugin.app.setting.openTabById("hotkeys");
+		// 			let searchTab = this.plugin.app.setting.activeTab;
+		// 			searchTab.searchInputEl.value = this.URICommand.name;
+					
+		// 			searchTab.onClose({this.open());
+
+		// 		})
 		// 	})
+
 
 
 		//https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L132
@@ -90,32 +103,22 @@ export default class URIModal extends Modal {
 		buttonDiv.appendChild(saveButton);
 
 		saveButton.onClickEvent( async () => {
-			let duplicateCommand = false;
-			let id = this.URICommand.name.trim().replace(" ", "-").toLowerCase(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
+			//replace spaces with - and add unix millisec timestamp (to ensure uniqueness)
+			let id = this.URICommand.name.trim().replace(" ", "-").toLowerCase() + moment().valueOf(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
 
-			this.plugin.settings.URICommands.forEach(command => {
-				if (command.id === id) {
-					console.log(command);
-					duplicateCommand = true; //want to just return but that closes the modal
-					new Notice("A URI command with this name already exists. Please choose a new name.");
-				}
-			})
+			this.URICommand.id = id; //in edit mode, if set above would update the command value so we couldn't check for name duplicates preroply
 
-			//if valid command name/id, save and exit
-			if (duplicateCommand === false) { 
-				this.URICommand.id = id; //in edit mode, if set directly would update the command immediately so we couldn't check for name duplicates preroply
-
-				if (this.editMode === false) { //creating a new command
-					this.plugin.settings.URICommands.push(this.URICommand);
-					this.plugin.addURICommand(this.URICommand);
-				} else { //editing an existing command
-					new Notice("You will need to restart Obsidian for the change to take effect.")
-				}
-	
-				await this.plugin.saveSettings();	
-				this.settingTab.display(); //refresh settings tab
-				this.close();
+			if (this.editMode === false) { //creating a new command
+				this.plugin.settings.URICommands.push(this.URICommand);
+				this.plugin.addURICommand(this.URICommand);
+			} else { //editing an existing command
+				new Notice("You will need to restart Obsidian for the change to take effect.")
 			}
+
+			await this.plugin.saveSettings();	
+			this.settingTab.display(); //refresh settings tab
+			this.close();
+			
 		})
 	}
 
