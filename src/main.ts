@@ -1,10 +1,11 @@
-import { Editor, Plugin, addIcon } from 'obsidian';
+import { Editor, Plugin, addIcon, Notice } from 'obsidian';
 import { URISettingTab, URIPluginSettings, DEFAULT_SETTINGS, URICommand } from './settings';
 import * as feather from "feather-icons";
 
 const SELECTION_TEMPLATE = "{{selection}}";
 const FILE_TEXT_TEMPLATE = "{{fileText}}";
 const FILE_NAME_TEMPLATE = "{{fileName}}";
+const METADATA_REGEX = /{{meta:([^}]*)}}/ //note that this will *not* match if the metadata name has a } in it
 
 
 export default class URIPlugin extends Plugin {
@@ -44,7 +45,7 @@ export default class URIPlugin extends Plugin {
 		let URIString = command.URITemplate;
 
 		//if needs editor
-		if (URIString.includes(FILE_NAME_TEMPLATE) || URIString.includes(FILE_TEXT_TEMPLATE) || URIString.includes(SELECTION_TEMPLATE)) { //refactor this not to be terrible
+		if (URIString.includes(FILE_NAME_TEMPLATE) || URIString.includes(FILE_TEXT_TEMPLATE) || URIString.includes(SELECTION_TEMPLATE) || METADATA_REGEX.test(URIString)) { //refactor this not to be terrible
 			this.addCommand({
 				id: command.id,
 				name: command.name,
@@ -68,6 +69,29 @@ export default class URIPlugin extends Plugin {
 						if (URIString.includes(SELECTION_TEMPLATE)) {
 							const encodedSelection = encodeURIComponent(editor.getSelection()); //currently replaced with empty string if no selection
 							URIString = URIString.replace(SELECTION_TEMPLATE, encodedSelection);
+						}
+
+						if (METADATA_REGEX.test(URIString)) {
+							//@ts-ignore
+							if(this.app.plugins.plugins["metaedit"].api) {
+								//@ts-ignore
+								const {getPropertyValue} = this.app.plugins.plugins["metaedit"].api;
+								//for every instance of the placeholder: extract the name of the field, get the corresponding value, and replace the placeholder with the encoded value
+
+								//https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
+								let metadataMatch = METADATA_REGEX.exec(URIString); //grab a matched group, where match[0] is the full regex and match [1] is the (first) group
+								while (metadataMatch !== null) {
+									let metadataValue = await getPropertyValue(metadataMatch[1], activeFile);
+									if (!metadataValue) { //want the "if undefined or null or empty string or etc" behavior
+										metadataValue = ""; //if this value doesn't exist on the file, replace placeholder with empty string
+									}
+									const encodedValue = encodeURIComponent(metadataValue);
+									URIString = URIString.replace(metadataMatch[0], encodedValue); //does this break when there are multiple instances of the same key placeholder?
+									metadataMatch = METADATA_REGEX.exec(URIString);
+								}
+							} else {
+								new Notice("Must have MetaEdit enabled to use metadata placeholders")
+							}
 						}
 					}
 					
