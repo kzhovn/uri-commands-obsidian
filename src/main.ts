@@ -5,6 +5,7 @@ import * as feather from "feather-icons";
 const SELECTION_TEMPLATE = "{{selection}}";
 const FILE_TEXT_TEMPLATE = "{{fileText}}";
 const FILE_NAME_TEMPLATE = "{{fileName}}";
+const LINE_TEMPLATE = "{{line}}";
 const METADATA_REGEX = /{{meta:([^}]*)}}/ //note that this will *not* match if the metadata name has a } in it
 
 
@@ -44,8 +45,12 @@ export default class URIPlugin extends Plugin {
 	addURICommand(command: URICommand) {
 		let URIString = command.URITemplate;
 
-		//if needs editor
-		if (URIString.includes(FILE_NAME_TEMPLATE) || URIString.includes(FILE_TEXT_TEMPLATE) || URIString.includes(SELECTION_TEMPLATE) || METADATA_REGEX.test(URIString)) { //refactor this not to be terrible
+		const templates = [FILE_NAME_TEMPLATE, FILE_TEXT_TEMPLATE, SELECTION_TEMPLATE, LINE_TEMPLATE]
+		const uriContainsTemplate = templates.some(template => URIString.includes(template)) //https://stackoverflow.com/a/66980203
+		console.log(uriContainsTemplate)
+		//if the placeholder used needs an editor to be valid
+		if (uriContainsTemplate || METADATA_REGEX.test(URIString)) {
+			console.log("adding command")
 			this.addCommand({
 				id: command.id,
 				name: command.name,
@@ -56,19 +61,22 @@ export default class URIPlugin extends Plugin {
 					const activeFile = this.app.workspace.getActiveFile();
 
 					if (activeFile) { //is this redundant with editorCallback?
-						if (URIString.includes(FILE_NAME_TEMPLATE)) {
-							const encodedName = encodeURIComponent(activeFile.basename);
-							URIString = URIString.replace(FILE_NAME_TEMPLATE, encodedName);
+						if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
+							URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
 						}
 					
-						if (URIString.includes(FILE_TEXT_TEMPLATE)) {
-							const encodedFileText = encodeURIComponent(await this.app.vault.adapter.read(activeFile.path))
-							URIString = URIString.replace(FILE_TEXT_TEMPLATE, encodedFileText);
+						if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
+							const fileText = await this.app.vault.adapter.read(activeFile.path);
+							URIString = replacePlaceholder(URIString, FILE_TEXT_TEMPLATE, fileText);
 						}
 
-						if (URIString.includes(SELECTION_TEMPLATE)) {
-							const encodedSelection = encodeURIComponent(editor.getSelection()); //currently replaced with empty string if no selection
-							URIString = URIString.replace(SELECTION_TEMPLATE, encodedSelection);
+						if (URIString.includes(SELECTION_TEMPLATE)) { //current selection
+							URIString = replacePlaceholder(URIString, SELECTION_TEMPLATE, editor.getSelection()); //currently replaced with empty string if no selection
+						}
+
+						if (URIString.includes(LINE_TEMPLATE)) { //current line
+							const currentLine = editor.getCursor().line
+							URIString = replacePlaceholder(URIString, LINE_TEMPLATE, editor.getLine(currentLine)); 
 						}
 
 						if (METADATA_REGEX.test(URIString)) {
@@ -111,6 +119,8 @@ export default class URIPlugin extends Plugin {
 		}
 	}
 
+
+
 	//from phibr0
 	private addFeatherIcons() {
 		Object.values(feather.icons).forEach((icon) => {
@@ -119,7 +129,11 @@ export default class URIPlugin extends Plugin {
 			this.iconList.push("feather-" + icon.name);
 		});
 	}
-	
+}
+
+function replacePlaceholder(URIString: string, placeholder: string | RegExp, replacementString: string) {
+	const encodedReplacement = encodeURIComponent(replacementString);
+	return URIString.replace(placeholder, encodedReplacement);
 }
 
 

@@ -46,7 +46,7 @@ export default class URIModal extends Modal {
 
 		new Setting(contentEl)
 			.setName("URI")
-			.setDesc("Accepts {{fileName}}, {{fileText}}, {{selection}}, and {{meta:FIELD_NAME}} placeholders.")
+			.setDesc("Accepts {{fileName}}, {{fileText}}, {{selection}}, {{line}} and {{meta:FIELD_NAME}} placeholders.")
 			.addText((textEl) => {
 				textEl.setValue(this.URICommand.URITemplate)
 				.onChange((value) => {
@@ -104,9 +104,7 @@ export default class URIModal extends Modal {
 
 		saveButton.onClickEvent( async () => {
 			//replace spaces with - and add unix millisec timestamp (to ensure uniqueness)
-			let id = this.URICommand.name.trim().replace(" ", "-").toLowerCase() + moment().valueOf(); //https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L62
-
-			this.URICommand.id = id; //in edit mode, if set above would update the command value so we couldn't check for name duplicates preroply
+			this.URICommand.id = this.URICommand.name.trim().replace(" ", "-").toLowerCase() + moment().valueOf();
 
 			if (this.editMode === false) { //creating a new command
 				this.plugin.settings.URICommands.push(this.URICommand);
@@ -117,8 +115,7 @@ export default class URIModal extends Modal {
 
 			await this.plugin.saveSettings();	
 			this.settingTab.display(); //refresh settings tab
-			this.close();
-			
+			this.close();	
 		})
 	}
 
