@@ -1,4 +1,4 @@
-import { Editor, Plugin, addIcon, Notice } from 'obsidian';
+import { Editor, Plugin, addIcon, Notice, TFile } from 'obsidian';
 import { URISettingTab, URIPluginSettings, DEFAULT_SETTINGS, URICommand } from './settings';
 import * as feather from "feather-icons";
 
@@ -45,12 +45,13 @@ export default class URIPlugin extends Plugin {
 	addURICommand(command: URICommand) {
 		let URIString = command.URITemplate;
 
-		const templates = [FILE_NAME_TEMPLATE, FILE_TEXT_TEMPLATE, SELECTION_TEMPLATE, LINE_TEMPLATE]
-		const uriContainsTemplate = templates.some(template => URIString.includes(template)) //https://stackoverflow.com/a/66980203
-		console.log(uriContainsTemplate)
-		//if the placeholder used needs an editor to be valid
-		if (uriContainsTemplate || METADATA_REGEX.test(URIString)) {
-			console.log("adding command")
+		const editorTemplates = [SELECTION_TEMPLATE, LINE_TEMPLATE]
+		const fileTextTemplates = [FILE_NAME_TEMPLATE, FILE_TEXT_TEMPLATE]
+		const uriContainsEditorTemplates = editorTemplates.some(template => URIString.includes(template)) //https://stackoverflow.com/a/66980203
+		const uriContainsTextTemplates = fileTextTemplates.some(template => URIString.includes(template))
+
+		if (uriContainsEditorTemplates) { //if the placeholder used needs an editor to be valid
+			console.log("Requires editor")
 			this.addCommand({
 				id: command.id,
 				name: command.name,
@@ -80,45 +81,84 @@ export default class URIPlugin extends Plugin {
 						}
 
 						if (METADATA_REGEX.test(URIString)) {
-							//@ts-ignore
-							if(this.app.plugins.plugins["metaedit"].api) {
-								//@ts-ignore
-								const {getPropertyValue} = this.app.plugins.plugins["metaedit"].api;
-								//for every instance of the placeholder: extract the name of the field, get the corresponding value, and replace the placeholder with the encoded value
-
-								//https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
-								let metadataMatch = METADATA_REGEX.exec(URIString); //grab a matched group, where match[0] is the full regex and match [1] is the (first) group
-								while (metadataMatch !== null) {
-									let metadataValue = await getPropertyValue(metadataMatch[1], activeFile);
-									if (!metadataValue) { //want the "if undefined or null or empty string or etc" behavior
-										metadataValue = ""; //if this value doesn't exist on the file, replace placeholder with empty string
-									}
-									const encodedValue = encodeURIComponent(metadataValue);
-									URIString = URIString.replace(metadataMatch[0], encodedValue); //does this break when there are multiple instances of the same key placeholder?
-									metadataMatch = METADATA_REGEX.exec(URIString);
-								}
-							} else {
-								new Notice("Must have MetaEdit enabled to use metadata placeholders")
-							}
+							replaceRegex(activeFile); //do I want await here?
 						}
 					}
-					
 					window.open(URIString);
 				}
 			})	
+		} else if (uriContainsTextTemplates || METADATA_REGEX.test(URIString)) { //if the placeholder used just requires an active file
+			console.log("Requires active file")
+			this.addCommand({
+				id: command.id,
+				name: command.name,
+				icon: command.icon,
+		
+				checkCallback: (checking: boolean) => {
+					const activeFile = this.app.workspace.getActiveFile();
+					URIString = command.URITemplate; //needs to be set *inside* the command
+
+					if (activeFile) {
+						if (!checking) {
+							if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
+								URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
+							}
+						
+							if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
+								replaceFileText(activeFile); //moved out because I can't have sync checkCallback
+							}	
+							if (METADATA_REGEX.test(URIString)) {
+								replaceRegex(activeFile);
+							}
+	
+							window.open(URIString);
+						}
+						return true; 						
+					}
+
+					return false; //no active file - can't run command
+				}
+			});	
 		} else { //no editor, no placeholders
 			this.addCommand({
 				id: command.id,
 				name: command.name,
 				icon: command.icon,
 		
-				callback: () => { //remove check, I think that's okay because URIs should be valid everywhere? honestly not 100% sure what thats doing in the default plugin
+				callback: () => {
 					window.open(URIString);
 				}
 			})
 		}
-	}
 
+		async function replaceFileText(file: TFile) {
+			const fileText = await this.app.vault.read(file); //because checkCallback can't be async - probably a better way to do this than factor out a single line?
+			URIString = replacePlaceholder(URIString, FILE_TEXT_TEMPLATE, fileText);
+		}
+	
+		async function replaceRegex(file: TFile) {
+			//@ts-ignore
+			if(this.app.plugins.plugins["metaedit"].api) {
+				//@ts-ignore
+				const {getPropertyValue} = this.app.plugins.plugins["metaedit"].api;
+				//for every instance of the placeholder: extract the name of the field, get the corresponding value, and replace the placeholder with the encoded value
+	
+				//https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
+				let metadataMatch = METADATA_REGEX.exec(URIString); //grab a matched group, where match[0] is the full regex and match [1] is the (first) group
+				while (metadataMatch !== null) {
+					let metadataValue = await getPropertyValue(metadataMatch[1], file);
+					if (!metadataValue) { //want the "if undefined or null or empty string or etc" behavior
+						metadataValue = ""; //if this value doesn't exist on the file, replace placeholder with empty string
+					}
+					const encodedValue = encodeURIComponent(metadataValue);
+					URIString = URIString.replace(metadataMatch[0], encodedValue); //does this break when there are multiple instances of the same key placeholder?
+					metadataMatch = METADATA_REGEX.exec(URIString);
+				}
+			} else {
+				new Notice("Must have MetaEdit enabled to use metadata placeholders")
+			}
+		}
+	}
 
 
 	//from phibr0
