@@ -94,7 +94,7 @@ export default class URIPlugin extends Plugin {
 					const activeFile = this.app.workspace.getActiveFile();
 					URIString = command.URITemplate; //needs to be set *inside* the command
 
-					if (activeFile && activeFile.extension == "md") {
+					if (activeFile && activeFile.extension == "md") { //support .txt etc?
 						if (!checking) {
 							if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
 								URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
