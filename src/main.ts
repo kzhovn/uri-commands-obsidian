@@ -46,12 +46,9 @@ export default class URIPlugin extends Plugin {
 		let URIString = command.URITemplate;
 
 		const editorTemplates = [SELECTION_TEMPLATE, LINE_TEMPLATE]
-		const fileTextTemplates = [FILE_NAME_TEMPLATE, FILE_TEXT_TEMPLATE]
 		const uriContainsEditorTemplates = editorTemplates.some(template => URIString.includes(template)) //https://stackoverflow.com/a/66980203
-		const uriContainsTextTemplates = fileTextTemplates.some(template => URIString.includes(template))
 
 		if (uriContainsEditorTemplates) { //if the placeholder used needs an editor to be valid
-			console.log("Requires editor")
 			this.addCommand({
 				id: command.id,
 				name: command.name,
@@ -67,7 +64,7 @@ export default class URIPlugin extends Plugin {
 						}
 					
 						if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
-							const fileText = await this.app.vault.adapter.read(activeFile.path);
+							const fileText = await this.app.vault.read(activeFile);
 							URIString = replacePlaceholder(URIString, FILE_TEXT_TEMPLATE, fileText);
 						}
 
@@ -86,9 +83,39 @@ export default class URIPlugin extends Plugin {
 					}
 					window.open(URIString);
 				}
-			})	
-		} else if (uriContainsTextTemplates || METADATA_REGEX.test(URIString)) { //if the placeholder used just requires an active file
-			console.log("Requires active file")
+			});
+		} else if (URIString.includes(FILE_TEXT_TEMPLATE) || METADATA_REGEX.test(URIString)) { //if the placeholder used requires an active .md file, but no editor
+			this.addCommand({
+				id: command.id,
+				name: command.name,
+				icon: command.icon,
+		
+				checkCallback: (checking: boolean) => {
+					const activeFile = this.app.workspace.getActiveFile();
+					URIString = command.URITemplate; //needs to be set *inside* the command
+
+					if (activeFile && activeFile.extension == "md") {
+						if (!checking) {
+							if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
+								URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
+							}
+						
+							if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
+								replaceFileText(activeFile); //moved out because I can't have sync checkCallback
+							}	
+							if (METADATA_REGEX.test(URIString)) {
+								replaceRegex(activeFile);
+							}
+	
+							window.open(URIString);
+						}
+						return true; 						
+					}
+
+					return false; //no active file - can't run command
+				}
+			});	
+		} else if (URIString.includes(FILE_NAME_TEMPLATE)) { //placeholder requires an active file, doesn't have to be markdown
 			this.addCommand({
 				id: command.id,
 				name: command.name,
@@ -102,13 +129,6 @@ export default class URIPlugin extends Plugin {
 						if (!checking) {
 							if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
 								URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
-							}
-						
-							if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
-								replaceFileText(activeFile); //moved out because I can't have sync checkCallback
-							}	
-							if (METADATA_REGEX.test(URIString)) {
-								replaceRegex(activeFile);
 							}
 	
 							window.open(URIString);
