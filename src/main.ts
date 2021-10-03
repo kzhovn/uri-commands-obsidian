@@ -55,17 +55,10 @@ export default class URIPlugin extends Plugin {
 				editorCallback: async (editor: Editor, view: MarkdownView) => {
 					let URIString = command.URITemplate; //needs to be set *inside* the command
 					const file = view.file;
-					console.log(URIString);
 
 					URIString = this.replaceName(URIString, file);
-					console.log(URIString);
-
 					URIString = await this.replaceText(URIString, file);
-					console.log(URIString);
-
 					URIString = await this.replaceMeta(URIString, file);
-
-					console.log(URIString);
 
 					if (URIString === null)  { return; }
 
@@ -76,10 +69,7 @@ export default class URIPlugin extends Plugin {
 					if (URIString.includes(LINE_TEMPLATE)) { //current line
 						const currentLine = editor.getCursor().line;
 						URIString = replacePlaceholder(URIString, LINE_TEMPLATE, editor.getLine(currentLine)); 
-					}
-
-					console.log(URIString)
-					
+					}					
 					
 					window.open(URIString);
 				}
@@ -112,8 +102,6 @@ export default class URIPlugin extends Plugin {
 			return null;
 		}
 
-		console.log("Replace name: " + URIString);
-
 		if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
 			if (file) {
 				return replacePlaceholder(URIString, FILE_NAME_TEMPLATE, file.basename);
@@ -141,7 +129,7 @@ export default class URIPlugin extends Plugin {
 				return null;
 			}
 		}
-		
+
 		return URIString;
 	}
 
@@ -149,8 +137,7 @@ export default class URIPlugin extends Plugin {
 	//null if it attempted an illegal operation, and the unmodified URI string if there are no {{meta:}} placeholders
 	async replaceMeta(URIString: string, file: TFile): Promise<string> {
 		if(METADATA_REGEX.test(URIString)) {
-			console.log("Meta")
-			//check if I can use metadata placeholder
+			//checks if you can use metadata placeholder
 			//@ts-ignore
 			if (!this.app.plugins.plugins["metaedit"].api) {
 				new Notice("Must have MetaEdit enabled to use metadata placeholders")
@@ -168,12 +155,14 @@ export default class URIPlugin extends Plugin {
 			//for every instance of the placeholder: extract the name of the field, get the corresponding value, and replace the placeholder with the encoded value
 			//https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
 			let metadataMatch = METADATA_REGEX.exec(URIString); //grab a matched group, where match[0] is the full regex and match [1] is the (first) group
+			
 			while (metadataMatch !== null) { //loop through all the matched until exec() isn't spitting out any more
 				let metadataValue = await getPropertyValue(metadataMatch[1], file);
-				if (!metadataValue) { //want the "if undefined or null or empty string or etc" behavior
-					metadataValue = ""; //if this value doesn't exist on the file, replace placeholder with empty string
+				if (!metadataValue) { //if this value doesn't exist on the file
+					new Notice("The field " + metadataMatch[1] + " does not exist on this file.")
+					return null;
 				}
-				URIString = replacePlaceholder(URIString, metadataMatch[0], metadataValue); //does this break when there are multiple instances of the same key placeholder?
+				URIString = replacePlaceholder(URIString, metadataMatch[0], metadataValue);
 				metadataMatch = METADATA_REGEX.exec(URIString);
 			}
 		}
