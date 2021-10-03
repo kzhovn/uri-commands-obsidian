@@ -1,7 +1,6 @@
 import { Editor, Plugin, addIcon, Notice, TFile, MarkdownView } from 'obsidian';
 import { URISettingTab, URIPluginSettings, DEFAULT_SETTINGS, URICommand } from './settings';
 import * as feather from "feather-icons";
-import { replace } from 'feather-icons';
 
 const SELECTION_TEMPLATE = "{{selection}}";
 const FILE_TEXT_TEMPLATE = "{{fileText}}";
