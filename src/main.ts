@@ -1,4 +1,4 @@
-import { Editor, Plugin, addIcon, Notice, TFile } from 'obsidian';
+import { Editor, Plugin, addIcon, Notice, TFile, MarkdownView } from 'obsidian';
 import { URISettingTab, URIPluginSettings, DEFAULT_SETTINGS, URICommand } from './settings';
 import * as feather from "feather-icons";
 
@@ -43,10 +43,8 @@ export default class URIPlugin extends Plugin {
 	}
 
 	addURICommand(command: URICommand) {
-		let URIString = command.URITemplate;
-
 		const editorTemplates = [SELECTION_TEMPLATE, LINE_TEMPLATE]
-		const uriContainsEditorTemplates = editorTemplates.some(template => URIString.includes(template)) //https://stackoverflow.com/a/66980203
+		const uriContainsEditorTemplates = editorTemplates.some(template => command.URITemplate.includes(template)) //https://stackoverflow.com/a/66980203
 
 		if (uriContainsEditorTemplates) { //if the placeholder used needs an editor to be valid
 			this.addCommand({
@@ -54,130 +52,114 @@ export default class URIPlugin extends Plugin {
 				name: command.name,
 				icon: command.icon,
 		
-				editorCallback: async (editor: Editor) => {
-					URIString = command.URITemplate; //needs to be set *inside* the command
-					const activeFile = this.app.workspace.getActiveFile();
+				editorCallback: async (editor: Editor, view: MarkdownView) => {
+					let URIString = command.URITemplate; //needs to be set *inside* the command
+					const file = view.file;
 
-					if (activeFile) { //is this redundant with editorCallback?
-						if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
-							URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
-						}
-					
-						if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
-							const fileText = await this.app.vault.read(activeFile);
-							URIString = replacePlaceholder(URIString, FILE_TEXT_TEMPLATE, fileText);
-						}
+					URIString = this.replaceName(URIString, file);
+					URIString = await this.replaceText(URIString, file);
+					URIString = await this.replaceMeta(URIString, file);
 
-						if (URIString.includes(SELECTION_TEMPLATE)) { //current selection
-							URIString = replacePlaceholder(URIString, SELECTION_TEMPLATE, editor.getSelection()); //currently replaced with empty string if no selection
-						}
-
-						if (URIString.includes(LINE_TEMPLATE)) { //current line
-							const currentLine = editor.getCursor().line
-							URIString = replacePlaceholder(URIString, LINE_TEMPLATE, editor.getLine(currentLine)); 
-						}
-
-						if (METADATA_REGEX.test(URIString)) {
-							replaceRegex(activeFile); //do I want await here?
-						}
+					if (URIString.includes(SELECTION_TEMPLATE)) { //current selection
+						URIString = replacePlaceholder(URIString, SELECTION_TEMPLATE, editor.getSelection()); //currently replaced with empty string if no selection
 					}
+
+					if (URIString.includes(LINE_TEMPLATE)) { //current line
+						const currentLine = editor.getCursor().line
+						URIString = replacePlaceholder(URIString, LINE_TEMPLATE, editor.getLine(currentLine)); 
+					}
+					
+					if (URIString === null) {
+						return;
+					}
+					
 					window.open(URIString);
 				}
 			});
-		} else if (URIString.includes(FILE_TEXT_TEMPLATE) || METADATA_REGEX.test(URIString)) { //if the placeholder used requires an active .md file, but no editor
+		} else { //no editor required -> note that placeholders might still be invalid
 			this.addCommand({
 				id: command.id,
 				name: command.name,
 				icon: command.icon,
 		
-				checkCallback: (checking: boolean) => {
-					const activeFile = this.app.workspace.getActiveFile();
-					URIString = command.URITemplate; //needs to be set *inside* the command
+				callback: async () => {
+					let URIString = command.URITemplate; //needs to be set *inside* the command
+					const file = this.app.workspace.getActiveFile();
 
-					if (activeFile && activeFile.extension == "md") { //support .txt etc?
-						if (!checking) {
-							if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
-								URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
-							}
-						
-							if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
-								replaceFileText(activeFile); //moved out because I can't have sync checkCallback
-							}	
-							if (METADATA_REGEX.test(URIString)) {
-								replaceRegex(activeFile);
-							}
-	
-							window.open(URIString);
-						}
-						return true; 						
+					URIString = this.replaceName(URIString, file);
+					URIString = await this.replaceText(URIString, file);
+					URIString = await this.replaceMeta(URIString, file);
+					
+					if (URIString === null) {
+						return;
 					}
-
-					return false; //no active file - can't run command
-				}
-			});	
-		} else if (URIString.includes(FILE_NAME_TEMPLATE)) { //placeholder requires an active file, doesn't have to be markdown
-			this.addCommand({
-				id: command.id,
-				name: command.name,
-				icon: command.icon,
-		
-				checkCallback: (checking: boolean) => {
-					const activeFile = this.app.workspace.getActiveFile();
-					URIString = command.URITemplate; //needs to be set *inside* the command
-
-					if (activeFile) {
-						if (!checking) {
-							if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
-								URIString = replacePlaceholder(URIString, FILE_NAME_TEMPLATE, activeFile.basename);
-							}
-	
-							window.open(URIString);
-						}
-						return true; 						
-					}
-
-					return false; //no active file - can't run command
-				}
-			});	
-		} else { //no editor, no placeholders
-			this.addCommand({
-				id: command.id,
-				name: command.name,
-				icon: command.icon,
-		
-				callback: () => {
+					
 					window.open(URIString);
 				}
-			})
+			});
 		}
+	}
 
-		async function replaceFileText(file: TFile) {
-			const fileText = await this.app.vault.read(file); //because checkCallback can't be async - probably a better way to do this than factor out a single line?
-			URIString = replacePlaceholder(URIString, FILE_TEXT_TEMPLATE, fileText);
-		}
-	
-		async function replaceRegex(file: TFile) {
-			//@ts-ignore
-			if(this.app.plugins.plugins["metaedit"].api) {
-				//@ts-ignore
-				const {getPropertyValue} = this.app.plugins.plugins["metaedit"].api;
-				//for every instance of the placeholder: extract the name of the field, get the corresponding value, and replace the placeholder with the encoded value
-	
-				//https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
-				let metadataMatch = METADATA_REGEX.exec(URIString); //grab a matched group, where match[0] is the full regex and match [1] is the (first) group
-				while (metadataMatch !== null) {
-					let metadataValue = await getPropertyValue(metadataMatch[1], file);
-					if (!metadataValue) { //want the "if undefined or null or empty string or etc" behavior
-						metadataValue = ""; //if this value doesn't exist on the file, replace placeholder with empty string
-					}
-					const encodedValue = encodeURIComponent(metadataValue);
-					URIString = URIString.replace(metadataMatch[0], encodedValue); //does this break when there are multiple instances of the same key placeholder?
-					metadataMatch = METADATA_REGEX.exec(URIString);
-				}
+	//return URI with the {{fileName}} placeholders replaced with the name of the file, or null if the file is null
+	replaceName(URIString: string, file: TFile) {
+		if (URIString.includes(FILE_NAME_TEMPLATE)) { //note name (no path or extension)
+			if (file) {
+				return replacePlaceholder(URIString, FILE_NAME_TEMPLATE, file.basename);
 			} else {
-				new Notice("Must have MetaEdit enabled to use metadata placeholders")
+				new Notice("Must have active file to use {{fileName}} placeholder.")
+				return null;
+			}
+		} 
+	}
+
+	//returns URI with the {{fileText}} placeholders replaced with the text of the file, or null if it can't grab file text
+	async replaceText(URIString: string, file: TFile) {
+		if (URIString.includes(FILE_TEXT_TEMPLATE)) { //text of full file
+			if (file && file.extension === "md") {
+				const fileText = await this.app.vault.read(file);
+				return replacePlaceholder(URIString, FILE_TEXT_TEMPLATE, fileText);	
+			} else {
+				new Notice("Must have active markdown file to use {{fileText}} placeholder.")
+				return null;
 			}
 		}
+		return URIString;
+	}
+
+	//returns a URI with the {{meta:}} placeholders replaced with their corresponding values if I can grab metadata here
+	//null if it attempted an illegal operation, and the unmodified URI string if there are no {{meta:}} placeholders
+	async replaceMeta(URIString: string, file: TFile) {
+		if(METADATA_REGEX.test(URIString)) {
+			//check if I can use metadata placeholder
+			//@ts-ignore
+			if (!this.app.plugins.plugins["metaedit"].api) {
+				new Notice("Must have MetaEdit enabled to use metadata placeholders")
+				return null;
+			} else if (!file) {
+				new Notice("Must have active file to use {{meta:}} placeholder.");
+				return null;
+			} else if (URIString === null) {
+				return null;
+			}
+
+			//@ts-ignore
+			const {getPropertyValue} = this.app.plugins.plugins["metaedit"].api;
+			
+			//for every instance of the placeholder: extract the name of the field, get the corresponding value, and replace the placeholder with the encoded value
+			//https://stackoverflow.com/questions/432493/how-do-you-access-the-matched-groups-in-a-javascript-regular-expression
+			let metadataMatch = METADATA_REGEX.exec(URIString); //grab a matched group, where match[0] is the full regex and match [1] is the (first) group
+			while (metadataMatch !== null) { //loop through all the matched until exec() isn't spitting out any more
+				let metadataValue = await getPropertyValue(metadataMatch[1], file);
+				if (!metadataValue) { //want the "if undefined or null or empty string or etc" behavior
+					metadataValue = ""; //if this value doesn't exist on the file, replace placeholder with empty string
+				}
+				const encodedValue = encodeURIComponent(metadataValue); // TODO: placeholder this
+				URIString = URIString.replace(metadataMatch[0], encodedValue); //does this break when there are multiple instances of the same key placeholder?
+				metadataMatch = METADATA_REGEX.exec(URIString);
+			}
+		}
+
+		return URIString;
 	}
 
 
@@ -192,6 +174,10 @@ export default class URIPlugin extends Plugin {
 }
 
 function replacePlaceholder(URIString: string, placeholder: string | RegExp, replacementString: string) {
+	if (URIString === null) {
+		return null;
+	}
+	
 	const encodedReplacement = encodeURIComponent(replacementString);
 	return URIString.replace(placeholder, encodedReplacement);
 }
