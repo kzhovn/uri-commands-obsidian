@@ -1,6 +1,6 @@
 {
   "name": "uri-commands",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Execute URIs from the Obsidian command palette.",
   "main": "main.js",
   "scripts": {
