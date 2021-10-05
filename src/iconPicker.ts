@@ -5,6 +5,7 @@ import URIPlugin from "src/main";
 import { URICommand } from "./settings";
 import URIModal from "./URIModal";
 
+
 export class IconPicker extends FuzzySuggestModal<string>{
     plugin: URIPlugin;
     command: URICommand;
@@ -47,5 +48,4 @@ export class IconPicker extends FuzzySuggestModal<string>{
         this.modal.display();
         this.close();
     }
-
 }
