@@ -8,10 +8,12 @@ export interface URICommand extends Command {
 
 export interface URIPluginSettings {
 	URICommands: URICommand[];
+    notification: boolean;
 }
 
 export const DEFAULT_SETTINGS: URIPluginSettings = {
 	URICommands: [],
+    notification: false,
 }
 
 //borrowed in part from phibr0's Customizable Sidebar plugin
@@ -27,7 +29,7 @@ export class URISettingTab extends PluginSettingTab {
 		let { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: 'URI Commands - Settings' });
+		containerEl.createEl('h2', { text: 'Commands' });
 
         new Setting(containerEl)
             .setName("Add URI")
@@ -79,6 +81,20 @@ export class URISettingTab extends PluginSettingTab {
             }
             setting.nameEl.addClass("URI-flex");
         });
+
+        containerEl.createEl('h2', { text: 'Settings' });
+
+        new Setting(containerEl)
+            .setName("Notification on launch")
+            .setDesc("Display a notification with the command URI on launch.")
+            .addToggle(toggle => {
+                toggle.setValue(this.plugin.settings.notification)
+                    .onChange(value => {
+                        this.plugin.settings.notification = value;
+                        this.plugin.saveSettings();
+                    })
+            })
+
 
 	}
 }

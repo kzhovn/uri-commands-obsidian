@@ -70,8 +70,7 @@ export default class URIPlugin extends Plugin {
 						uriString = replacePlaceholder(uriString, LINE_TEMPLATE, editor.getLine(currentLine)); 
 					}					
 					
-					window.open(uriString);
-					new Notice(`Opening ${uriString}`);
+					this.runCommand(uriString);
 				}
 			});
 		} else { //no editor required -> note that placeholders might still be invalid
@@ -89,11 +88,16 @@ export default class URIPlugin extends Plugin {
 					uriString = await this.replaceMeta(uriString, file);
 					
 					if (uriString === null) return;
-					
-					window.open(uriString);
-					new Notice(`Opening ${uriString}`);
+					this.runCommand(uriString);
 				}
 			});
+		}
+	}
+
+	runCommand(uriString: string) {
+		window.open(uriString);
+		if (this.settings.notification === true) {
+			new Notice(`Opening ${uriString}`);
 		}
 	}
 
