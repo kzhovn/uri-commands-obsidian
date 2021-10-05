@@ -79,12 +79,10 @@ export default class URIModal extends Modal {
 
 		saveButton.onClickEvent(async () => {
 			if (this.editMode === false) { //creating a new command
-				this.plugin.settings.URICommands.push(this.uriCommand);
-				this.plugin.addURICommand(this.uriCommand);
 				//replace spaces with - and add unix millisec timestamp (to ensure uniqueness)
 				this.uriCommand.id = this.uriCommand.name.trim().replace(" ", "-").toLowerCase() + moment().valueOf();
-			} else { //editing an existing command
-				new Notice("You will need to restart Obsidian for the change to fully take effect.")
+				this.plugin.settings.URICommands.push(this.uriCommand);
+				this.plugin.addURICommand(this.uriCommand);
 			}
 
 			await this.plugin.saveSettings();	
