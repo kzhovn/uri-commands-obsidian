@@ -62,10 +62,11 @@ export class URISettingTab extends PluginSettingTab {
                     button.setIcon("trash")
                           .setTooltip("Remove command")
                           .onClick(async () => {
+                            // Unregister the command from the palette
+                            (this.app as any).commands.removeCommand(`${this.plugin.manifest.id}:${command.id}`);
                             this.plugin.settings.URICommands.remove(command);
                             await this.plugin.saveSettings();
                             this.display();
-                            new Notice("You will need to restart Obsidian for the command to disappear.")
                         })
                 })
                 .addExtraButton(button => {

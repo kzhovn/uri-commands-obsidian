@@ -8,6 +8,7 @@ const FILE_NAME_TEMPLATE = "{{fileName}}";
 const LINE_TEMPLATE = "{{line}}";
 const METADATA_REGEX = /{{meta:([^}]*)}}/; //note that this will *not* match if the metadata name has a } in it
 
+const editorTemplates = [SELECTION_TEMPLATE, LINE_TEMPLATE];  // templates that require an editor to extract
 
 export default class URIPlugin extends Plugin {
 	settings: URIPluginSettings;
@@ -42,59 +43,44 @@ export default class URIPlugin extends Plugin {
 	}
 
 	addURICommand(command: URICommand) {
-		const editorTemplates = [SELECTION_TEMPLATE, LINE_TEMPLATE];
-		const uriContainsEditorTemplates = editorTemplates.some(template => command.URITemplate.includes(template)); //https://stackoverflow.com/a/66980203
+		this.addCommand({
+			id: command.id,
+			name: command.name,
+			icon: command.icon,
 
-		if (uriContainsEditorTemplates) { //if the placeholder used needs an editor to be valid
-			this.addCommand({
-				id: command.id,
-				name: command.name,
-				icon: command.icon,
-		
-				editorCallback: async (editor: Editor, view: MarkdownView) => {
-					let uriString = command.URITemplate; //needs to be set *inside* the command
-					const file = view.file;
-
-					uriString = this.replaceName(uriString, file);
-					uriString = await this.replaceText(uriString, file);
-					uriString = await this.replaceMeta(uriString, file);
-
-					if (uriString === null) return;
-
-					if (uriString.includes(SELECTION_TEMPLATE)) { //current selection
-						uriString = replacePlaceholder(uriString, SELECTION_TEMPLATE, editor.getSelection()); //currently replaced with empty string if no selection
-					}
-
-					if (uriString.includes(LINE_TEMPLATE)) { //current line
-						const currentLine = editor.getCursor().line;
-						uriString = replacePlaceholder(uriString, LINE_TEMPLATE, editor.getLine(currentLine)); 
-					}					
-					
-					this.runCommand(uriString);
+			checkCallback: (check: boolean) => {
+				const view: MarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+				const file: TFile = this.app.workspace.getActiveFile();
+				const editor: Editor = view?.editor;
+				if (!editor) {
+					const uriContainsEditorTemplates = editorTemplates.some(template => command.URITemplate.includes(template)); //https://stackoverflow.com/a/66980203
+					// Command will only be available if an editor is
+					if (uriContainsEditorTemplates) return false;
 				}
-			});
-		} else { //no editor required -> note that placeholders might still be invalid
-			this.addCommand({
-				id: command.id,
-				name: command.name,
-				icon: command.icon,
-		
-				callback: async () => {
-					let uriString = command.URITemplate; //needs to be set *inside* the command
-					const file = this.app.workspace.getActiveFile();
-
-					uriString = this.replaceName(uriString, file);
-					uriString = await this.replaceText(uriString, file);
-					uriString = await this.replaceMeta(uriString, file);
-					
-					if (uriString === null) return;
-					this.runCommand(uriString);
-				}
-			});
-		}
+				if (!check) this.runCommand(command, editor, file);
+				return true;
+			}
+		});
 	}
 
-	runCommand(uriString: string) {
+	async runCommand(command: URICommand, editor?: Editor, file?: TFile) {
+		let uriString = command.URITemplate;
+
+		uriString = this.replaceName(uriString, file);
+		uriString = await this.replaceText(uriString, file);
+		uriString = await this.replaceMeta(uriString, file);
+
+		if (uriString === null) return;
+
+		if (uriString.includes(SELECTION_TEMPLATE)) { //current selection
+			uriString = replacePlaceholder(uriString, SELECTION_TEMPLATE, editor.getSelection()); //currently replaced with empty string if no selection
+		}
+
+		if (uriString.includes(LINE_TEMPLATE)) { //current line
+			const currentLine = editor.getCursor().line;
+			uriString = replacePlaceholder(uriString, LINE_TEMPLATE, editor.getLine(currentLine));
+		}
+
 		window.open(uriString);
 		if (this.settings.notification === true) {
 			new Notice(`Opening ${uriString}`);
