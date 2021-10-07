@@ -1,4 +1,4 @@
-import { Modal, Notice, Setting, moment } from "obsidian";
+import { Modal, Setting, moment } from "obsidian";
 import { IconPicker } from "./iconPicker";
 import URIPlugin from "./main";
 import { URISettingTab, URICommand } from "./settings";
@@ -59,10 +59,9 @@ export default class URIModal extends Modal {
 			.setName("Add icon")
 			.setDesc("Optional")
 			.addButton(button => {
-				//button appearance
-				if (this.uriCommand.icon) {
+				if (this.uriCommand.icon) { //button looks like the existing icon
 					button.setIcon(this.uriCommand.icon);
-				} else {
+				} else { //or if no existing icon
 					button.setButtonText("Pick icon");
 				}
 
@@ -83,6 +82,9 @@ export default class URIModal extends Modal {
 				this.uriCommand.id = this.uriCommand.name.trim().replace(" ", "-").toLowerCase() + moment().valueOf();
 				this.plugin.settings.URICommands.push(this.uriCommand);
 				this.plugin.addURICommand(this.uriCommand);
+			} else { //remove and readd command, works around forcing the user to reload the entire app
+				(this.app as any).commands.removeCommand(`${this.plugin.manifest.id}:${this.uriCommand.id}`);
+				this.plugin.addURICommand(this.uriCommand);				
 			}
 
 			await this.plugin.saveSettings();	
