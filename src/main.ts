@@ -9,6 +9,7 @@ const LINE_TEMPLATE = "{{line}}";
 const METADATA_REGEX = /{{meta:([^}]*)}}/; //note that this will *not* match if the metadata name has a } in it
 
 const editorTemplates = [SELECTION_TEMPLATE, LINE_TEMPLATE];  // templates that require an editor to extract
+const fileTemplates = [FILE_NAME_TEMPLATE, FILE_TEXT_TEMPLATE] // templates that require an active file (but not an editor)
 
 export default class URIPlugin extends Plugin {
 	settings: URIPluginSettings;
@@ -52,17 +53,26 @@ export default class URIPlugin extends Plugin {
 				const view: MarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
 				const file: TFile = this.app.workspace.getActiveFile();
 				const editor: Editor = view?.editor;
-				if (!editor) {
+				if (!editor) { 
 					const uriContainsEditorTemplates = editorTemplates.some(template => command.URITemplate.includes(template)); //https://stackoverflow.com/a/66980203
-					// Command will only be available if an editor is
-					if (uriContainsEditorTemplates) return false;
+					if (uriContainsEditorTemplates) return false; // Command will only be available if an editor is
 				}
+
+				if (!file) { // 
+					const uriContainsFileTemplates = fileTemplates.some(template => command.URITemplate.includes(template));
+					if (uriContainsFileTemplates || METADATA_REGEX.test(command.URITemplate)) return false;
+				} else if (file.extension !== "md") {
+					if (command.URITemplate.includes(FILE_TEXT_TEMPLATE)) return false;
+				}
+
 				if (!check) this.runCommand(command, editor, file);
 				return true;
 			}
 		});
 	}
 
+	/* rewrite all the below not to suck, I'm doing redudant checks and it's generally ugly as sin*/
+	
 	async runCommand(command: URICommand, editor?: Editor, file?: TFile) {
 		let uriString = command.URITemplate;
 
