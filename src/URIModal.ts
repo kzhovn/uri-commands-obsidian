@@ -23,7 +23,7 @@ export default class URIModal extends Modal {
 				URITemplate: "",
 			}
 		} else {
-			this.uriCommand = command; 
+			this.uriCommand = command;
 		}
 	}
 
@@ -46,7 +46,7 @@ export default class URIModal extends Modal {
 
 		new Setting(contentEl)
 			.setName("URI")
-			.setDesc("Accepts {{fileName}}, {{fileText}}, {{selection}}, {{line}} and {{meta:FIELD_NAME}} placeholders.")
+			.setDesc("Accepts {{fileName}}, {{fileText}}, {{selection}}, {{line}}, {{filePath}}, {{vaultName}} and {{meta:FIELD_NAME}} placeholders.")
 			.addText((textEl) => {
 				textEl.setValue(this.uriCommand.URITemplate)
 				.onChange((value) => {
@@ -84,12 +84,12 @@ export default class URIModal extends Modal {
 				this.plugin.addURICommand(this.uriCommand);
 			} else { //remove and readd command, works around forcing the user to reload the entire app
 				(this.app as any).commands.removeCommand(`${this.plugin.manifest.id}:${this.uriCommand.id}`);
-				this.plugin.addURICommand(this.uriCommand);				
+				this.plugin.addURICommand(this.uriCommand);
 			}
 
-			await this.plugin.saveSettings();	
+			await this.plugin.saveSettings();
 			this.settingTab.display(); //refresh settings tab
-			this.close();	
+			this.close();
 		});
 	}
 
