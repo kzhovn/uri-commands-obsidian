@@ -4,6 +4,7 @@ import URIModal from './URIModal';
 
 export interface URICommand extends Command {
 	URITemplate: string;
+    encode: boolean;
 }
 
 export interface URIPluginSettings {
@@ -42,7 +43,7 @@ export class URISettingTab extends PluginSettingTab {
             });
 
         this.plugin.settings.URICommands.forEach(command => {
-			if (command === null) { //this should *not* happen 
+			if (command === null) { //this should *not* happen
 				this.plugin.settings.URICommands.remove(command);
 				console.log("Command was null, removing.")
 				return;
@@ -51,7 +52,7 @@ export class URISettingTab extends PluginSettingTab {
             let iconDiv: HTMLElement;
             if (command.icon) { //do want the "if null or empty string or undefined or etc" behavior
                 iconDiv = createDiv({ cls: "URI-settings-icon" });
-                setIcon(iconDiv, command.icon, 20);    
+                setIcon(iconDiv, command.icon, 20);
             }
 
 
@@ -76,7 +77,7 @@ export class URISettingTab extends PluginSettingTab {
                             new URIModal(this.plugin, this, command, true).open()
                     })
                 });
-            
+
             if (command.icon) {
                 setting.nameEl.prepend(iconDiv);
             }

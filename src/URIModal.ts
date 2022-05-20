@@ -21,6 +21,7 @@ export default class URIModal extends Modal {
 				name: "",
 				id: "",
 				URITemplate: "",
+				encode: true,
 			}
 		} else {
 			this.uriCommand = command;
@@ -69,6 +70,16 @@ export default class URIModal extends Modal {
 					new IconPicker(this.plugin, this.uriCommand, this).open()
 				});
 			});
+
+		new Setting(contentEl)
+			.setName("URL-encode input")
+			.setDesc("Automatically URL-encode any user input text. Should only be off if content is already encoded or itself a URI scheme (e.g.. a bare URL with https://).")
+			.addToggle(toggle => {
+				toggle.setValue(this.uriCommand.encode)
+					.onChange(value => {
+						this.uriCommand.encode = value;
+					})
+			})
 
 
 		//https://github.com/phibr0/obsidian-macros/blob/master/src/ui/macroModal.ts#L132

@@ -2,7 +2,7 @@
 This plugin allows you to add custom URI commands to the command palette. Can be used with the [Obsidian URI scheme](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI), as well as any other URI scheme your computer supports.
 
 ### Placeholders
-You can use the placeholders below in your URI. All of these are [URL-encoded](https://en.wikipedia.org/wiki/Percent-encoding) for you, so you don't need to worry about your text having any unescaped illegal or reserved characters.
+You can use the placeholders below in your URI. All of these are [URL-encoded](https://en.wikipedia.org/wiki/Percent-encoding) for you unless you turn off URL-encoding, so you don't need to worry about your text having any unescaped illegal or reserved characters.
 
 All commands with placeholders are hidden when there is no active file.
 
@@ -31,6 +31,8 @@ All commands with placeholders are hidden when there is no active file.
     - Note that for websites, you *must* start your URI with `https://` or `http://`, not `www.`
 - Open the wikipedia page for the contents of the YAML field "topic": `https://en.wikipedia.org/wiki/{{meta:topic}}`
 - Look up your selection in your Calibre library: `calibre://search/_?q={{selection}}`
+- Open the url in the "external-link" metadata field: `{{meta:external-link}}`
+    - Note that for this to work, URL encoding must be turned off
 
 ## Related plugins
 - [Advanced URI](https://github.com/Vinzent03/obsidian-advanced-uri): enables URIs for daily note, appending text to a file, jump to heading, search and replace, and more

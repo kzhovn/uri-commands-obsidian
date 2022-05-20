@@ -92,35 +92,35 @@ export default class URIPlugin extends Plugin {
 					new Notice(`The field ${metadataMatch[1]} does not exist on this file.`)
 					return;
 				}
-				uriString = replacePlaceholder(uriString, metadataMatch[0], metadataValue);
+				uriString = replacePlaceholder(command, uriString, metadataMatch[0], metadataValue);
 				metadataMatch = METADATA_REGEX.exec(uriString);
 			}
 		}
 
 		if (uriString.includes(FILE_NAME_TEMPLATE)) { // base name of file
-			uriString = replacePlaceholder(uriString, FILE_NAME_TEMPLATE, file.basename);
+			uriString = replacePlaceholder(command, uriString, FILE_NAME_TEMPLATE, file.basename);
 		}
 
 		if (uriString.includes(FILE_TEXT_TEMPLATE)) { //entire text of file
 			const fileText = await this.app.vault.read(file);
-			return replacePlaceholder(uriString, FILE_TEXT_TEMPLATE, fileText);
+			return replacePlaceholder(command, uriString, FILE_TEXT_TEMPLATE, fileText);
 		}
 
 		if (uriString.includes(SELECTION_TEMPLATE)) { //current selection
-			uriString = replacePlaceholder(uriString, SELECTION_TEMPLATE, editor.getSelection()); //currently replaced with empty string if no selection
+			uriString = replacePlaceholder(command, uriString, SELECTION_TEMPLATE, editor.getSelection()); //currently replaced with empty string if no selection
 		}
 
 		if (uriString.includes(LINE_TEMPLATE)) { //current line
 			const currentLine = editor.getCursor().line;
-			uriString = replacePlaceholder(uriString, LINE_TEMPLATE, editor.getLine(currentLine));
+			uriString = replacePlaceholder(command, uriString, LINE_TEMPLATE, editor.getLine(currentLine));
 		}
 
 		if (uriString.includes(FILE_PATH_TEMPLATE)) { //path inside the vault to the current file
-			uriString = replacePlaceholder(uriString, FILE_PATH_TEMPLATE, file.path);
+			uriString = replacePlaceholder(command, uriString, FILE_PATH_TEMPLATE, file.path);
 		}
 
 		if (uriString.includes(VAULT_NAME_TEMPLATE)) { //name of the current vault
-			uriString = replacePlaceholder(uriString, VAULT_NAME_TEMPLATE, this.app.vault.getName());
+			uriString = replacePlaceholder(command, uriString, VAULT_NAME_TEMPLATE, this.app.vault.getName());
 		}
 
 		window.open(uriString);
@@ -128,12 +128,14 @@ export default class URIPlugin extends Plugin {
 			new Notice(`Opening ${uriString}`);
 		}
 	}
-
 }
 
-function replacePlaceholder(uriString: string, placeholder: string | RegExp, replacementString: string) {
-	const encodedReplacement = encodeURIComponent(replacementString);
-	return uriString.replace(placeholder, encodedReplacement);
+function replacePlaceholder(command: URICommand, uriString: string, placeholder: string | RegExp, replacementString: string) {
+	if (command.encode) {
+		replacementString = encodeURIComponent(replacementString);
+	}
+
+	return uriString.replace(placeholder, replacementString);
 }
 
 
