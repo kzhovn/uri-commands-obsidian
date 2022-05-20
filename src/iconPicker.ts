@@ -2,6 +2,7 @@
 
 import { FuzzyMatch, FuzzySuggestModal, setIcon } from "obsidian";
 import URIPlugin from "src/main";
+import { ICON_LIST } from "./icon_list";
 import { URICommand } from "./settings";
 import URIModal from "./URIModal";
 
@@ -28,11 +29,11 @@ export class IconPicker extends FuzzySuggestModal<string>{
     }
 
     getItems(): string[] {
-        return this.plugin.iconList;
+        return ICON_LIST;
     }
 
     getItemText(item: string): string {
-        return this.cap(item.replace("feather-", "").replace(/-/ig, " "));
+        return this.cap(item.replace(/-/ig, " "));
     }
 
     renderSuggestion(item: FuzzyMatch<string>, el: HTMLElement): void {
