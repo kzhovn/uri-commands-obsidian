@@ -103,7 +103,7 @@ export default class URIPlugin extends Plugin {
 
 		if (uriString.includes(FILE_TEXT_TEMPLATE)) { //entire text of file
 			const fileText = await this.app.vault.read(file);
-			return replacePlaceholder(command, uriString, FILE_TEXT_TEMPLATE, fileText);
+			uriString = replacePlaceholder(command, uriString, FILE_TEXT_TEMPLATE, fileText);
 		}
 
 		if (uriString.includes(SELECTION_TEMPLATE)) { //current selection
